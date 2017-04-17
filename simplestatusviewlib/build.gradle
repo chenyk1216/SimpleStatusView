@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 25
@@ -28,4 +30,13 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
+}
+//upload to Bintray settings
+publish {
+    userOrg = 'chenyk1216'
+    groupId = 'android.dev.chenyk'
+    artifactId = 'simplestatusview'
+    version = '1.0.0'
+    description = 'Simple set a variety of state view'
+    website = "https://github.com/chenykKits/SimpleStatusView"
 }

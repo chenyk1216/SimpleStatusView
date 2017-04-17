@@ -2,9 +2,6 @@ package com.chenyk.simplestatusviewlib;
 
 import android.content.Context;
 import android.support.annotation.IdRes;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -13,9 +10,11 @@ import android.widget.FrameLayout.LayoutParams;
 /**
  * Created by chenyk on 2017/4/13.
  * 多状态视图
- * 1、显示和隐藏各种状态视图showEmptyView(),
+ * 1、显示和隐藏各种状态视图{@link #showEmptyView()} {@link #hideEmptyView()}
  * 2、目标视图默认自动隐藏和显示
  * 3、空视图、出错视图和网络异常视图互斥，仅接受一个视图可见，加载视图可与其他视图同时可见
+ * 4、状态视图大小默认为目标视图大小，亦可自行定制{@link Builder#setLayoutParams(int, int)}
+ * 5、设置重试监听回调，默认点击状态视图有效，亦可自行设置重试id{@link Builder#setRetryId(int)}
  */
 
 public class SimpleStatusView implements View.OnClickListener {
@@ -225,17 +224,31 @@ public class SimpleStatusView implements View.OnClickListener {
         return showView;
     }
 
+    public Builder newBuilder() {
+        return new Builder(this);
+    }
+
     public static class Builder {
-        private Context context;
-        private View targetView;
+        private Context mContext;
+        private View mTargetView;
         private int mRetryIdRes;
         private int mWidth;
         private int mHeight;
-        private ViewConfigManager config;
+        private ViewConfigManager mConfig;
         private IClickRetry mIClickRetry;
 
         public Builder(Context context) {
-            this.context = context;
+            this.mContext = context;
+        }
+
+        public Builder(SimpleStatusView simpleStatusView) {
+            this.mContext = simpleStatusView.mContext;
+            this.mTargetView = simpleStatusView.mTargetView;
+            this.mRetryIdRes = simpleStatusView.mRetryIdRes;
+            this.mWidth = simpleStatusView.mWidth;
+            this.mHeight = simpleStatusView.mHeight;
+            this.mConfig = simpleStatusView.mConfig;
+            this.mIClickRetry = simpleStatusView.mIClickRetry;
         }
 
         /**
@@ -245,7 +258,7 @@ public class SimpleStatusView implements View.OnClickListener {
          * @return
          */
         public Builder setTargetView(View targetView) {
-            this.targetView = targetView;
+            this.mTargetView = targetView;
             return this;
         }
 
@@ -279,7 +292,7 @@ public class SimpleStatusView implements View.OnClickListener {
          * @return
          */
         public Builder config(ViewConfigManager config) {
-            this.config = config;
+            this.mConfig = config;
             return this;
         }
 
@@ -299,7 +312,7 @@ public class SimpleStatusView implements View.OnClickListener {
          * @return
          */
         public SimpleStatusView build() {
-            return new SimpleStatusView(context, targetView, mRetryIdRes, mWidth, mHeight, config, mIClickRetry);
+            return new SimpleStatusView(mContext, mTargetView, mRetryIdRes, mWidth, mHeight, mConfig, mIClickRetry);
         }
     }
 }

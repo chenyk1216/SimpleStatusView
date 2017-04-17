@@ -1,14 +1,13 @@
 package com.chenyk.simplestatusviewlib;
 
 import android.content.Context;
-import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.view.LayoutInflater;
 import android.view.View;
 
 /**
  * Created by chenyk on 2017/4/13.
- * 状态视图配置管理器
+ * 状态视图配置管理器,仅提供各种状态视图设置
  */
 
 public class ViewConfigManager {
