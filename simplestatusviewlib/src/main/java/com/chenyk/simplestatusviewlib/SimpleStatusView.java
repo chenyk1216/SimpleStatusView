@@ -3,6 +3,8 @@ package com.chenyk.simplestatusviewlib;
 import android.content.Context;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -34,6 +36,9 @@ public class SimpleStatusView implements View.OnClickListener {
 
     private Context mContext;
     private View mTargetView;
+    private int mRetryIdRes;
+    private int mWidth;
+    private int mHeight;
     private ViewConfigManager mConfig;
     private IClickRetry mIClickRetry;
     private FrameLayout mFramelayout;
@@ -42,9 +47,12 @@ public class SimpleStatusView implements View.OnClickListener {
     private View mNotNetView;
     private View mLoadingView;
 
-    public SimpleStatusView(Context context, View targetView, ViewConfigManager config, IClickRetry iClickRetry) {
+    public SimpleStatusView(Context context, View targetView, int retryIdRes, int width, int height, ViewConfigManager config, IClickRetry iClickRetry) {
         this.mContext = context;
         this.mTargetView = targetView;
+        this.mRetryIdRes = retryIdRes;
+        this.mWidth = width;
+        this.mHeight = height;
         this.mConfig = config;
         this.mIClickRetry = iClickRetry;
         init();
@@ -58,41 +66,20 @@ public class SimpleStatusView implements View.OnClickListener {
     /**
      * 创建一个跟目标视图宽度高度一致的layout，并添加
      */
-    public void createLayout() {
+    private void createLayout() {
         if (mTargetView != null) {
             ViewGroup mViewGroup = (ViewGroup) mTargetView.getParent();
-            ViewGroup.LayoutParams layoutParams = mTargetView.getLayoutParams();//获取目标视图的长宽配置信息
-            LayoutParams lp = new LayoutParams(layoutParams.width, layoutParams.height);
+            LayoutParams lp;
+            if (mWidth > 0 && mHeight > 0) {
+                lp = new LayoutParams(mWidth, mHeight);
+            } else {
+                ViewGroup.LayoutParams layoutParams = mTargetView.getLayoutParams();//获取目标视图的长宽配置信息
+                lp = new LayoutParams(layoutParams.width, layoutParams.height);
+            }
             mFramelayout = new FrameLayout(mContext);
             mFramelayout.setLayoutParams(lp);
             mViewGroup.addView(mFramelayout);
         }
-    }
-
-    /**
-     * 设置视图大小
-     *
-     * @param width  宽度
-     * @param height 高度
-     */
-    public void setLayoutParams(int width, int height) {
-
-    }
-
-    /**
-     * 设置重试控件的id值，必须包含在出错视图或网络异常视图中，否则无效
-     * @param idRes 控件id
-     */
-    public void setRetryId(@IdRes int idRes){
-
-    }
-
-    /**
-     * 设置重试视图，必须包含在出错视图或网络异常视图中，否则无效
-     * @param layoutRes
-     */
-    public void setRetryView(@LayoutRes int layoutRes){
-
     }
 
     /**
@@ -110,17 +97,22 @@ public class SimpleStatusView implements View.OnClickListener {
             }
             if (mErrorView != null) {
                 configView(TYPE.ERROE_VIEW, mErrorView);
-                mErrorView.setOnClickListener(this);
+                if (mRetryIdRes > 0 && mErrorView.findViewById(mRetryIdRes) != null) {
+                    mErrorView.findViewById(mRetryIdRes).setOnClickListener(this);
+                } else mErrorView.setOnClickListener(this);
             }
 
             if (mNotNetView != null) {
                 configView(TYPE.NOT_NET_VIEW, mNotNetView);
-                mNotNetView.setOnClickListener(this);
+                if (mRetryIdRes > 0 && mNotNetView.findViewById(mRetryIdRes) != null) {
+                    mNotNetView.findViewById(mRetryIdRes).setOnClickListener(this);
+                } else mNotNetView.setOnClickListener(this);
             }
 
             if (mLoadingView != null) {
                 configView(TYPE.LOADING_VIEW, mLoadingView);
             }
+
         }
     }
 
@@ -236,6 +228,9 @@ public class SimpleStatusView implements View.OnClickListener {
     public static class Builder {
         private Context context;
         private View targetView;
+        private int mRetryIdRes;
+        private int mWidth;
+        private int mHeight;
         private ViewConfigManager config;
         private IClickRetry mIClickRetry;
 
@@ -253,6 +248,29 @@ public class SimpleStatusView implements View.OnClickListener {
             this.targetView = targetView;
             return this;
         }
+
+        /**
+         * 设置重试控件的id值，必须包含在出错视图或网络异常视图中，否则无效
+         *
+         * @param retryIdRes 控件id
+         */
+        public Builder setRetryId(@IdRes int retryIdRes) {
+            this.mRetryIdRes = retryIdRes;
+            return this;
+        }
+
+        /**
+         * 设置视图大小
+         *
+         * @param width  宽度
+         * @param height 高度
+         */
+        public Builder setLayoutParams(int width, int height) {
+            this.mWidth = width;
+            this.mHeight = height;
+            return this;
+        }
+
 
         /**
          * 设置视图配置信息
@@ -281,7 +299,7 @@ public class SimpleStatusView implements View.OnClickListener {
          * @return
          */
         public SimpleStatusView build() {
-            return new SimpleStatusView(context, targetView, config, mIClickRetry);
+            return new SimpleStatusView(context, targetView, mRetryIdRes, mWidth, mHeight, config, mIClickRetry);
         }
     }
 }
